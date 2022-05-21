@@ -42,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'The auido level is:',
+              'The audio level is:',
             ),
             if (_showLevel)
               StreamBuilder<double>(
