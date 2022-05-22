@@ -1,24 +1,14 @@
 package com.example.testflutter
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.ContextWrapper
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.os.BatteryManager
-import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
 import io.flutter.embedding.android.FlutterActivity
 
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import android.media.AudioFormat;
-import android.media.AudioRecord;
-import android.media.MediaRecorder;
-import androidx.core.app.ActivityCompat
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
 
 var audioLevel: AudioLevel? = null
 class MainActivity : FlutterActivity() {
@@ -29,19 +19,22 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
             // Note: this method is invoked on the main thread.
                 call, result ->
-            if (call.method == "initializeAudioLevel") {
-                initializeAudioLevel()
-                result.success(true)
-            }
-            else if (call.method == "stopAudioLevel") {
-                stopAudioLevel()
-                result.success(true)
-            }
-            else if (call.method == "getAudioLevel") {
-                val audioLevel = getAudioLevel()
-                result.success(audioLevel)
-            } else {
-                result.notImplemented()
+            when (call.method) {
+                "initializeAudioLevel" -> {
+                    initializeAudioLevel()
+                    result.success(true)
+                }
+                "stopAudioLevel" -> {
+                    stopAudioLevel()
+                    result.success(true)
+                }
+                "getAudioLevel" -> {
+                    val audioLevel = getAudioLevel()
+                    result.success(audioLevel)
+                }
+                else -> {
+                    result.notImplemented()
+                }
             }
         }
     }
@@ -71,11 +64,11 @@ class MainActivity : FlutterActivity() {
 
 class AudioLevel {
 
-    private var ar: AudioRecord? = null;
-    private var minSize: Int = 0;
+    private var ar: AudioRecord? = null
+    private var minSize: Int = 0
 
     @SuppressLint("MissingPermission")
-    public fun start() {
+    fun start() {
         minSize = AudioRecord.getMinBufferSize(
             8000,
             AudioFormat.CHANNEL_IN_MONO,
@@ -88,16 +81,16 @@ class AudioLevel {
             AudioFormat.ENCODING_PCM_16BIT,
             minSize
         )
-        ar!!.startRecording();
+        ar!!.startRecording()
     }
 
-    public fun stop() {
+    fun stop() {
         if (ar != null) {
-            ar!!.stop();
+            ar!!.stop()
         }
     }
 
-    public fun getAmplitude(): Double {
+    fun getAmplitude(): Double {
         val buffer = ShortArray(minSize)
         ar!!.read(buffer, 0, minSize)
         return convert(buffer.maxOrNull()!!.toDouble(), (0..33_000), (0..1))
