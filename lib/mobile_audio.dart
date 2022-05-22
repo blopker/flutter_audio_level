@@ -1,21 +1,27 @@
 import 'dart:async';
-import 'dart:math';
+
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 Stream<double> getAudioLevelStream() {
   late StreamController<double> controller;
   Timer? timer;
-  var random = Random();
+  const platform = MethodChannel('samples.flutter.dev/audioLevel');
   callback(double level) {
     controller.add(level);
   }
 
-  void start() {
-    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      callback(random.nextDouble());
+  void start() async {
+    await Permission.microphone.request();
+    await platform.invokeMethod('initializeAudioLevel');
+    timer = Timer.periodic(const Duration(milliseconds: 100), (timer) async {
+      var level = await platform.invokeMethod('getAudioLevel');
+      callback(level);
     });
   }
 
-  void stop() {
+  void stop() async {
+    await platform.invokeMethod('stopAudioLevel');
     if (timer != null) {
       timer!.cancel();
     }
